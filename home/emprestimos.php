@@ -9,7 +9,7 @@ if ($_SESSION['usuario_tipo'] !== 'administrador' && $_SESSION['usuario_tipo'] !
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['novo_emprestimo'])) {
     $chave_id     = filter_input(INPUT_POST, 'chave_id', FILTER_VALIDATE_INT);
-    $pessoa_nome  = trim(filter_input(INPUT_POST, 'pessoa_nome', FILTER_SANITIZE_STRING));
+    $pessoa_nome = trim(filter_input(INPUT_POST, 'pessoa_nome', FILTER_SANITIZE_STRING));
     $usuario_id   = $_SESSION['usuario_id'];
 
     if ($chave_id && !empty($pessoa_nome)) {
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['novo_emprestimo'])) {
                 (chave_id, pessoa_nome, usuario_id, data_emprestimo) 
                 VALUES (?, ?, ?, NOW())
             ");
-            $stmt->execute([$chave_id, $pessoa_nome, $usuario_id]);
+            $stmt->execute([$chave_id, $pessoa_nome, $usuario_id]);;
 
             $stmt = $pdo->prepare("UPDATE chaves SET disponivel = FALSE WHERE id = ?");
             $stmt->execute([$chave_id]);
@@ -83,11 +83,10 @@ $emprestimos = $pdo->query("
     SELECT 
         e.id, 
         c.codigo AS chave, 
-        p.nome AS pessoa,  -- Nome vindo da tabela pessoas
+        e.pessoa_nome AS pessoa, 
         e.data_emprestimo 
     FROM emprestimos e
     LEFT JOIN chaves c ON e.chave_id = c.id
-    LEFT JOIN pessoas p ON e.pessoa_id = p.id  -- Junção com a tabela pessoas
     WHERE e.data_devolucao IS NULL
     ORDER BY e.data_emprestimo DESC
 ")->fetchAll();

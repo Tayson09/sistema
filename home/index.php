@@ -55,17 +55,17 @@ require_once __DIR__ . '/../includes/config.php';
                     <tbody>
                         <?php
                         $sql = "SELECT 
-                                    c.codigo AS chave,
-                                    e.pessoa_nome AS pessoa, 
-                                    e.data_emprestimo,
-                                    CASE 
-                                        WHEN e.data_devolucao IS NULL THEN 'Pendente'
-                                        ELSE 'Devolvido'
-                                    END AS status
-                                FROM emprestimos e
-                                LEFT JOIN chaves c ON e.chave_id = c.id  
-                                ORDER BY e.data_emprestimo DESC 
-                                LIMIT 5";
+                                c.codigo AS chave,
+                                e.pessoa_nome AS pessoa,  -- Nome direto da tabela empréstimos
+                                e.data_emprestimo,
+                                CASE 
+                                    WHEN e.data_devolucao IS NULL THEN 'Pendente'
+                                    ELSE 'Devolvido'
+                                END AS status
+                            FROM emprestimos e
+                            LEFT JOIN chaves c ON e.chave_id = c.id  
+                            ORDER BY e.data_emprestimo DESC 
+                            LIMIT 5";
 
                         $result = $pdo->query($sql);
                         while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
@@ -86,6 +86,5 @@ require_once __DIR__ . '/../includes/config.php';
             Sistema de Controle de Chaves - IFCE Campus Cedro © <?= date('Y') ?>
         </footer>
     </main>
-
 </body>
 </html>

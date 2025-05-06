@@ -9,9 +9,9 @@ if ($_SESSION['usuario_tipo'] !== 'administrador' && $_SESSION['usuario_tipo'] !
 }
 
 // Parâmetros de filtragem
-$pagina_atual    = isset($_GET['pagina'])        ? (int)$_GET['pagina'] : 1;
+$pagina_atual     = isset($_GET['pagina'])      ? (int)$_GET['pagina'] : 1;
 $itens_por_pagina = 15;
-$offset          = ($pagina_atual - 1) * $itens_por_pagina;
+$offset           = ($pagina_atual - 1) * $itens_por_pagina;
 
 // Filtros
 $busca         = isset($_GET['busca'])         ? trim($_GET['busca'])         : '';
@@ -25,33 +25,33 @@ $sql_where = [];
 $params    = [];
 
 if (!empty($busca)) {
-    $sql_where[]           = "(e.pessoa_nome   LIKE :busca OR c.codigo LIKE :busca2)";
-    $params[':busca']      = "%{$busca}%";
-    $params[':busca2']     = "%{$busca}%";
+    $sql_where[] = "(e.pessoa_nome LIKE :busca OR c.codigo LIKE :busca2)"; // Busca corrigida
+    $params[':busca']  = "%{$busca}%";
+    $params[':busca2'] = "%{$busca}%";
 }
 
 if (!empty($data_inicio) && !empty($data_fim)) {
-    $sql_where[]               = "DATE(e.data_emprestimo) BETWEEN :data_inicio AND :data_fim";
-    $params[':data_inicio']    = $data_inicio;
-    $params[':data_fim']       = $data_fim;
+    $sql_where[]             = "DATE(e.data_emprestimo) BETWEEN :data_inicio AND :data_fim";
+    $params[':data_inicio']  = $data_inicio;
+    $params[':data_fim']     = $data_fim;
 }
 
 if ($chave_id > 0) {
-    $sql_where[]               = "c.id = :chave_id";
-    $params[':chave_id']       = $chave_id;
+    $sql_where[]           = "c.id = :chave_id";
+    $params[':chave_id']   = $chave_id;
 }
 
 if (!empty($pessoa_nome)) {
-    $sql_where[]               = "e.pessoa_nome LIKE :pessoa_nome";
-    $params[':pessoa_nome']    = "%{$pessoa_nome}%";
+    $sql_where[]           = "e.pessoa_nome LIKE :pessoa_nome"; 
+    $params[':pessoa_nome']= "%{$pessoa_nome}%";
 }
 
-// Consulta base com dois joins para pegar quem emprestou e quem devolveu
+// Consulta base
 $sql_base = "
     SELECT 
         e.id,
         c.codigo               AS chave,
-        e.pessoa_nome,
+        e.pessoa_nome,          -- Nome direto da tabela empréstimos
         e.data_emprestimo,
         e.data_devolucao,
         u1.nome                AS quem_pegou,
@@ -74,7 +74,7 @@ $total_registros = $stmt_count->fetchColumn();
 $total_paginas   = ceil($total_registros / $itens_por_pagina);
 
 // Dados paginados
-$sql        = $sql_base . " ORDER BY e.data_emprestimo DESC LIMIT :limit OFFSET :offset";
+$sql = $sql_base . " ORDER BY e.data_emprestimo DESC LIMIT :limit OFFSET :offset";
 $params[':limit']  = $itens_por_pagina;
 $params[':offset'] = $offset;
 
