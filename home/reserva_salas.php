@@ -2,7 +2,6 @@
 session_start();
 require_once __DIR__ . '/../includes/config.php';
 
-// Verificar autenticação
 if (!isset($_SESSION['usuario_id'])) {
     header('Location: ../login/login.php');
     exit();
@@ -10,15 +9,12 @@ if (!isset($_SESSION['usuario_id'])) {
 
 $is_admin = ($_SESSION['tipo'] ?? '') === 'administrador';
 
-// Configurar timezone
 date_default_timezone_set('America/Fortaleza');
 
-// Gerar token CSRF
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Processar nova reserva
 $mensagem = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservar'])) {
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
@@ -32,12 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservar'])) {
     $usuario_id = $_SESSION['usuario_id'];
 
     try {
-        // Validar horário
         if (strtotime($hora_fim) <= strtotime($hora_inicio)) {
             throw new Exception('Horário final deve ser posterior ao inicial');
         }
 
-        // Verificar conflitos
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM reservas_salas 
                              WHERE sala_id = ? 
                              AND dia_semana = ?
@@ -58,7 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservar'])) {
             throw new Exception('Conflito de horário nesta sala');
         }
 
-        // Inserir reserva
         $stmt = $pdo->prepare("INSERT INTO reservas_salas 
                               (sala_id, usuario_id, dia_semana, hora_inicio, hora_fim) 
                               VALUES (?, ?, ?, ?, ?)");
@@ -70,7 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservar'])) {
     }
 }
 
-// Processar cancelamento
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancelar_id'])) {
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
         die('Token CSRF inválido!');
@@ -79,7 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancelar_id'])) {
     $id = $_POST['cancelar_id'];
     
     try {
-        // Verificar permissão
         $stmt = $pdo->prepare("SELECT usuario_id FROM reservas_salas WHERE id = ?");
         $stmt->execute([$id]);
         $reserva = $stmt->fetch();
@@ -98,7 +89,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancelar_id'])) {
     }
 }
 
-// Obter dados
 $salas = $pdo->query("SELECT * FROM salas WHERE ativo = 1 ORDER BY nome")->fetchAll(PDO::FETCH_ASSOC);
 $reservas_por_sala = [];
 

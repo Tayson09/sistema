@@ -43,12 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['devolucao'])) {
 
     if ($emprestimo_id) {
         try {
-            // Pega a chave vinculada
             $stmt = $pdo->prepare("SELECT chave_id FROM emprestimos WHERE id = ?");
             $stmt->execute([$emprestimo_id]);
             $chave_id = $stmt->fetchColumn();
 
-            // Atualiza data de devolução e usuário que devolveu
             $stmt = $pdo->prepare("
                 UPDATE emprestimos
                 SET 

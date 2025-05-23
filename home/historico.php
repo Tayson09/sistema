@@ -2,30 +2,26 @@
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/config.php';
 
-// Verificar permissão
 if ($_SESSION['usuario_tipo'] !== 'administrador' && $_SESSION['usuario_tipo'] !== 'recepcionista') {
     header('Location: index.php');
     exit;
 }
 
-// Parâmetros de filtragem
 $pagina_atual     = isset($_GET['pagina'])      ? (int)$_GET['pagina'] : 1;
 $itens_por_pagina = 15;
 $offset           = ($pagina_atual - 1) * $itens_por_pagina;
 
-// Filtros
 $busca         = isset($_GET['busca'])         ? trim($_GET['busca'])         : '';
 $data_inicio   = isset($_GET['data_inicio'])   ? $_GET['data_inicio']         : '';
 $data_fim      = isset($_GET['data_fim'])      ? $_GET['data_fim']            : '';
 $chave_id      = isset($_GET['chave_id'])      ? (int)$_GET['chave_id']       : 0;
 $pessoa_nome   = isset($_GET['pessoa_nome'])   ? trim($_GET['pessoa_nome'])   : '';
 
-// Construir consulta SQL
 $sql_where = [];
 $params    = [];
 
 if (!empty($busca)) {
-    $sql_where[] = "(e.pessoa_nome LIKE :busca OR c.codigo LIKE :busca2)"; // Busca corrigida
+    $sql_where[] = "(e.pessoa_nome LIKE :busca OR c.codigo LIKE :busca2)"; 
     $params[':busca']  = "%{$busca}%";
     $params[':busca2'] = "%{$busca}%";
 }
@@ -66,14 +62,12 @@ if (!empty($sql_where)) {
     $sql_base .= " WHERE " . implode(" AND ", $sql_where);
 }
 
-// Total de registros
 $sql_count   = "SELECT COUNT(*) FROM ({$sql_base}) AS total";
 $stmt_count  = $pdo->prepare($sql_count);
 $stmt_count->execute($params);
 $total_registros = $stmt_count->fetchColumn();
 $total_paginas   = ceil($total_registros / $itens_por_pagina);
 
-// Dados paginados
 $sql = $sql_base . " ORDER BY e.data_emprestimo DESC LIMIT :limit OFFSET :offset";
 $params[':limit']  = $itens_por_pagina;
 $params[':offset'] = $offset;
@@ -86,7 +80,6 @@ foreach ($params as $key => $value) {
 $stmt->execute();
 $registros = $stmt->fetchAll();
 
-// Lista de chaves para o filtro
 $chaves = $pdo->query("SELECT id, codigo FROM chaves ORDER BY codigo")->fetchAll();
 ?>
 

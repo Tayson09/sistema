@@ -7,18 +7,15 @@ $mensagem = '';
 $nome = '';
 $localizacao = '';
 
-// Processar formulário
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $nome = filter_input(INPUT_POST, 'nome', FILTER_SANITIZE_STRING);
         $localizacao = filter_input(INPUT_POST, 'localizacao', FILTER_SANITIZE_STRING);
 
-        // Validação
         if (empty($nome)) {
             throw new Exception("O nome da sala é obrigatório");
         }
 
-        // Inserir no banco
         $stmt = $pdo->prepare("INSERT INTO salas (nome, localizacao) VALUES (?, ?)");
         $stmt->execute([$nome, $localizacao]);
         

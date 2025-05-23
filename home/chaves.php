@@ -2,7 +2,6 @@
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/config.php';
 
-// Permitir apenas administradores e recepcionistas
 if (! in_array($_SESSION['usuario_tipo'], ['administrador', 'recepcionista'], true)) {
     header('Location: /sistema/home/index.php');
     exit;

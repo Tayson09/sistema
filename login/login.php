@@ -28,9 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $senhaSalva = $usuario['senha'];
             $idUsuario  = $usuario['id'];
 
-            // Primeiro, tenta com password_verify (BCrypt, Argon2 etc)
             if (password_verify($senha, $senhaSalva)) {
-                // Atualiza se necessário para o algoritmo/configuração atual
                 if (password_needs_rehash($senhaSalva, PASSWORD_DEFAULT)) {
                     $novaHash = password_hash($senha, PASSWORD_DEFAULT);
                     $upd = $pdo->prepare("UPDATE usuarios SET senha = ? WHERE id = ?");
@@ -42,9 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: /sistema/home/index.php');
                 exit();
             }
-            // Se falhar, tenta fallback SHA-256
             elseif (hash('sha256', $senha) === $senhaSalva) {
-                // Converte para Bcrypt
                 $novaHash = password_hash($senha, PASSWORD_DEFAULT);
                 $upd = $pdo->prepare("UPDATE usuarios SET senha = ? WHERE id = ?");
                 $upd->execute([$novaHash, $idUsuario]);
